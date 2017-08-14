@@ -17,8 +17,12 @@ fi
 
 if [ "$DISTRO" = "Red Hat" ]  || [ "$DISTRO" = "Ubuntu" ] || [ "$DISTRO" = "Debian" ]
 then
-
-cat > //usr/share/megam/megamgulpd/conf/gulpd.conf << 'EOF'
+CONF='//usr/share/megam/verticegulpd/conf/gulpd.conf'
+else if [ "$DISTRO" = "CoreOS" ]; then
+  CONF='//var/lib/megam/verticegulpd/conf/gulpd.conf'
+fi
+fi
+cat >$CONF  << 'EOF'
 
 ### Welcome to the Gulpd configuration file.
 
@@ -30,9 +34,11 @@ cat > //usr/share/megam/megamgulpd/conf/gulpd.conf << 'EOF'
   ###
 
   [meta]
-    riak = ["192.168.1.105:8087"]
-    api  = "https://api.megam.io/v2"
-    nsqd = ["103.56.92.4:4151"]
+  [meta]
+      user = "root"
+      nsqd = ["192.168.1.100:4150"]
+      scylla = ["192.168.1.100"]
+      scylla_keyspace = "vertice"
 
   ###
   ### [gulpd]
@@ -64,29 +70,24 @@ cat > //usr/share/megam/megamgulpd/conf/gulpd.conf << 'EOF'
 
 EOF
 
-sed -i "s/^[ \t]*name_gulp.*/    name = \"$NODE_NAME\"/" /usr/share/megam/megamgulpd/conf/gulpd.conf
-sed -i "s/^[ \t]*cats_id.*/    cats_id = \"$ASSEMBLIES_ID\"/" /usr/share/megam/megamgulpd/conf/gulpd.conf
-sed -i "s/^[ \t]*cat_id.*/    cat_id = \"$ASSEMBLY_ID\"/" /usr/share/megam/megamgulpd/conf/gulpd.conf
-
-fi
-
-
-
+sed -i "s/^[ \t]*name_gulp.*/    name = \"$NODE_NAME\"/" $CONF
+sed -i "s/^[ \t]*cats_id.*/    cats_id = \"$ASSEMBLIES_ID\"/" $CONF
+sed -i "s/^[ \t]*cat_id.*/    cat_id = \"$ASSEMBLY_ID\"/" $CONF
 
 case "$DISTRO" in
    "Ubuntu")
-stop megamgulpd
-start megamgulpd
+stop verticegulpd
+start verticegulpd
    ;;
    "Debian")
-systemctl stop megamgulpd.service
-systemctl start megamgulpd.service
+systemctl stop verticegulpd.service
+systemctl start verticegulpd.service
 systemctl stop cadvisor.service
 systemctl start cadvisor.service
    ;;
    "Red Hat")
-systemctl stop megamgulpd.service
-systemctl start megamgulpd.service
+systemctl stop verticegulpd.service
+systemctl start verticegulpd.service
 systemctl stop cadvisor.service
 systemctl start cadvisor.service
    ;;
@@ -105,21 +106,27 @@ sudo cat > //etc/hostname <<EOF
 $HOSTNAME
 EOF
 
-sudo cat >> //etc/hosts <<EOF
-$IP_ADDRESS $HOSTNAME localhost
+sudo cat > //etc/hosts <<EOF
+$ETHO_IP $HOSTNAME localhost
 
 EOF
-
 sudo cat > //etc/systemd/network/static.network <<EOF
 [Match]
 Name=ens3
 
 [Network]
-Address=$IP_ADDRESS/24
-Gateway=$GATEWAY
+Address=$ETH0_IP/24
+Gateway=$ETH0_GATEWAY
+DNS=8.8.8.8
+DNS=8.8.4.4
 EOF
 
 sudo systemctl restart systemd-networkd
+systemctl stop verticegulpd.service
+systemctl start verticegulpd.service
+systemctl stop cadvisor.service
+systemctl start cadvisor.service
+
 
    ;;
 esac

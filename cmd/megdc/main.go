@@ -19,15 +19,25 @@ import (
 	"os"
 	log "github.com/Sirupsen/logrus"
 	"github.com/megamsys/megdc/packages/megam"
+	//"github.com/megamsys/megdc/packages/config"
+//	"github.com/megamsys/megdc/packages/lvm"
 	"github.com/megamsys/megdc/packages/one"
 	"github.com/megamsys/megdc/packages/onehost"
 	"github.com/megamsys/megdc/packages/ceph"
+	"github.com/megamsys/megdc/packages/mesos"
+         "github.com/megamsys/megdc/packages/hostinfo"
+        "github.com/megamsys/megdc/packages/hostcheck"
+         "github.com/megamsys/megdc/packages/volume"
+         "github.com/megamsys/megdc/packages/bridge"
+         "github.com/megamsys/megdc/packages/attachonehost"
+          "github.com/megamsys/megdc/packages/datastore"
+         "github.com/megamsys/megdc/packages/network"
 	"github.com/megamsys/libgo/cmd"
 )
 
 // These variables are populated via the Go linker.
 var (
-	version string = "0.9"
+	version string = "1.0"
 	commit  string = "01"
 	branch  string = "master"
 	header  string = "Supported-Megdc"
@@ -51,6 +61,8 @@ func cmdRegistry(name string) *cmd.Manager {
 	m.Register(&megam.VerticeInstall{})
 	m.Register(&megam.Megamremove{})
 	m.Register(&megam.Megamreport{})
+	//m.Register(&config.VerticeConf{})
+	//m.Register(&lvm.Lvminstall{})
 	m.Register(&one.Oneinstall{})
 	m.Register(&one.Oneremove{})
 	m.Register(&onehost.Onehostinstall{})
@@ -61,6 +73,15 @@ func cmdRegistry(name string) *cmd.Manager {
 	m.Register(&onehost.Sshpass{})
 	m.Register(&ceph.Cephinstall{})
 	m.Register(&ceph.Cephgateway{})
+	m.Register(&mesos.MesosMasterInstall{})
+	m.Register(&mesos.MesosSlaveInstall{})
+        m.Register(&hostinfo.HostInfo{})
+        m.Register(&hostcheck.HostCheck{})
+        m.Register(&volume.CreateVolume{})
+        m.Register(&bridge.CreateBridge{})
+        m.Register(&attachonehost.AttachOneHost{})
+        m.Register(&datastore.CreateDatastoreLvm{})
+        m.Register(&network.CreateNetworkOpennebula{})
 	return m
 }
 

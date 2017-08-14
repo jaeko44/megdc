@@ -24,9 +24,10 @@ import (
 
 	pp "github.com/megamsys/libgo/cmd"
 	"github.com/megamsys/libgo/os"
-	"github.com/megamsys/megdc/templates"
-	_ "github.com/megamsys/megdc/templates/ubuntu"
-	_ "github.com/megamsys/megdc/templates/debian"
+	"github.com/megamsys/libmegdc/templates"
+	_ "github.com/megamsys/libmegdc/templates/ubuntu"
+	_ "github.com/megamsys/libmegdc/templates/debian"
+	_ "github.com/megamsys/libmegdc/templates/centos"
 	"github.com/tj/go-spin"
 )
 
@@ -79,9 +80,9 @@ func (h *Handler) SetTemplates(w *WrappedParms) {
 	}
 }
 
-func (h *Handler) Run() error {
+func (h *Handler) Run(w io.Writer,inputs map[string]string) error {
 	return templates.RunInTemplates(h.templates, func(t *templates.Template, _ chan *templates.Template) error {
-		err := t.Run()
+		err := t.Run(w,inputs)
 		if err != nil {
 			return err
 		}
